@@ -64,17 +64,17 @@ This scenario reflects a **common real-world SOC L1 case**.
 ---
 
 ## 📂 Repository Structure
+
 soc-l1-login-anomaly-analysis/
 ├── analysis/
-│ └── login_case_analysis.md
+│   └── login_case_analysis.md
 ├── detections/
-│ └── wazuh_bruteforce_rule.xml
+│   └── wazuh_bruteforce_rule.xml
 ├── logs/
-│ └── sample_auth.log
+│   └── sample_auth.log
 ├── escalation/
-│ └── soc_l1_escalation.md
+│   └── soc_l1_escalation.md
 └── screenshots/
-
 
 ---
 
