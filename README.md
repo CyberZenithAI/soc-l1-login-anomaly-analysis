@@ -1,67 +1,69 @@
 # 🔐 SOC L1 – Login Anomaly Analysis (2026)
 
-## 📌 Descripción
-Proyecto práctico donde simulo y analizo un **login sospechoso** siguiendo el flujo de trabajo de un **Analista SOC L1 Junior**, utilizando **Wazuh SIEM** y análisis de logs reales en un laboratorio controlado.
+## 📌 Overview
+Practical **SOC L1 portfolio project** focused on detecting, analyzing, and documenting **suspicious login activity** using **Wazuh SIEM** and real authentication logs within a controlled laboratory environment.
 
-Este repositorio está orientado a **portafolio profesional** para roles **SOC L1 / Blue Team Junior**.
-
----
-
-## 🎯 Objetivo del proyecto
-- Detectar actividad de autenticación sospechosa  
-- Analizar logs de seguridad  
-- Clasificar incidentes según severidad  
-- Escalar correctamente como Analista SOC L1  
+This repository is designed for **entry-level SOC / Blue Team roles**, demonstrating hands-on skills rather than theory alone.
 
 ---
 
-## 🧠 Escenario simulado
-- Ataque de **fuerza bruta SSH**
-- Múltiples intentos de login fallidos
-- Login exitoso posterior
-- Usuario válido en el sistema
+## 🎯 Project Objectives
+- Detect suspicious authentication behavior  
+- Analyze security logs (`auth.log`)  
+- Classify incidents by severity and impact  
+- Apply proper **SOC L1 escalation workflow**  
 
 ---
 
-## 🛠️ Herramientas utilizadas
-- **Wazuh SIEM** (Docker)
-- Kali Linux
-- SSH
-- Hydra *(solo laboratorio)*
-- VirusTotal
-- AbuseIPDB
-- GitHub (documentación)
+## 🧠 Simulated Scenario
+- **SSH brute-force attack**  
+- Multiple failed login attempts  
+- Subsequent successful login  
+- Valid local user account  
+
+This scenario reflects a **common real-world SOC L1 case**.
 
 ---
 
-## 🧩 Arquitectura del laboratorio
-| Rol | Sistema |
+## 🛠️ Tools & Technologies
+- **Wazuh SIEM** (Docker deployment)  
+- Kali Linux  
+- SSH  
+- Hydra *(used strictly in a controlled lab)*  
+- VirusTotal (IP reputation)  
+- AbuseIPDB (threat intelligence)  
+- GitHub (documentation & version control)  
+
+---
+
+## 🧩 Lab Architecture
+| Role | System |
 |---|---|
 | SOC Analyst | Kali Linux |
-| Endpoint | Kali Linux (SSH) |
+| Endpoint | Kali Linux (SSH service) |
 | SIEM | Wazuh (Docker) |
 
 ---
 
-## 🔍 Flujo de análisis SOC L1
-1. Revisión de alertas en Wazuh  
-2. Análisis de logs de autenticación (`auth.log`)  
-3. Validación de IP y comportamiento  
-4. Correlación de eventos  
-5. Clasificación del incidente  
-6. Escalamiento a SOC L2  
+## 🔍 SOC L1 Analysis Workflow
+1. Alert review in Wazuh Dashboard  
+2. Authentication log analysis (`auth.log`)  
+3. Source IP and behavior validation  
+4. Event correlation  
+5. Incident classification  
+6. Escalation to SOC L2 with evidence  
 
 ---
 
-## 📊 Clasificación del incidente
-- **Tipo:** Brute Force – SSH  
-- **Severidad:** Media / Alta  
-- **Impacto:** Riesgo de compromiso de credenciales  
-- **Acción recomendada:** Escalamiento y mitigación  
+## 📊 Incident Classification
+- **Type:** SSH Brute Force  
+- **Severity:** Medium / High  
+- **Impact:** Potential credential compromise  
+- **Recommended Action:** Escalation and mitigation  
 
 ---
 
-## 📂 Estructura del repositorio
+## 📂 Repository Structure
 soc-l1-login-anomaly-analysis/
 ├── analysis/
 │ └── login_case_analysis.md
@@ -76,23 +78,23 @@ soc-l1-login-anomaly-analysis/
 
 ---
 
-## 🧠 Qué demuestra este proyecto
-✔ Mentalidad SOC L1 real  
-✔ Análisis de logs  
-✔ Uso correcto de SIEM  
-✔ Clasificación y escalamiento  
-✔ Documentación profesional  
+## 🧠 Skills Demonstrated
+✔ SOC L1 operational mindset  
+✔ Log analysis and alert triage  
+✔ Proper SIEM usage  
+✔ Incident classification and escalation  
+✔ Clear and professional documentation  
 
 ---
 
-## 🚀 Rol objetivo
-**Analista SOC L1 / Blue Team Junior / Analista de Ciberseguridad Junior**
+## 🚀 Target Roles
+**SOC L1 Analyst | Blue Team Junior | Junior Cybersecurity Analyst**
 
 ---
 
-## ⚠️ Nota ética
-Todas las pruebas fueron realizadas en un **laboratorio propio y controlado**, con fines **educativos y profesionales**.
+## ⚠️ Ethical Notice
+All activities were conducted in a **self-owned, isolated lab environment** for **educational and professional purposes only**.
 
 ---
 
-📌 *Proyecto desarrollado como parte de mi preparación para trabajar en un SOC real en 2026.*
+📌 *This project was developed as part of my preparation to work in a real Security Operations Center (SOC) in 2026.*
