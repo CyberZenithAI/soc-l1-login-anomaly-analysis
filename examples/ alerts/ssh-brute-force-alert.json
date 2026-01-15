@@ -1,0 +1,33 @@
+{
+  "id": "alert-20240115-103020",
+  "timestamp": "2026-01-15T10:30:20.000Z",
+  "agent": {
+    "id": "001",
+    "name": "ssh.target.lab",
+    "ip": "10.10.10.20"
+  },
+  "manager": {
+    "name": "wazuh.manager"
+  },
+  "rule": {
+    "id": "100001",
+    "level": 10,
+    "description": "Multiple SSH authentication failures from same source IP (Brute Force)",
+    "groups": ["authentication_failures", "ssh", "brute_force"]
+  },
+  "data": {
+    "srcip": "10.10.10.30",
+    "srcport": "54321",
+    "dstip": "10.10.10.20",
+    "dstport": "22",
+    "protocol": "ssh",
+    "failed_attempts": 5,
+    "timeframe": "60 seconds",
+    "usernames": ["admin", "root", "test", "administrator"]
+  },
+  "location": "/var/log/auth.log",
+  "full_log": "Jan 15 10:30:15 ssh-server sshd[1234]: Failed password for invalid user admin from 10.10.10.30 port 54321 ssh2",
+  "decoder": {
+    "name": "sshd"
+  }
+}
