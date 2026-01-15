@@ -1,0 +1,40 @@
+# SOC L1 Lab - Configuración de SSH Server
+# Configuración segura para laboratorio
+
+Port 22
+ListenAddress 0.0.0.0
+
+Protocol 2
+
+# Autenticación
+PermitRootLogin yes
+PasswordAuthentication yes
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+UsePAM yes
+
+# Seguridad
+LoginGraceTime 60
+MaxAuthTries 5
+MaxSessions 10
+ClientAliveInterval 300
+ClientAliveCountMax 3
+
+# Logging
+SyslogFacility AUTH
+LogLevel VERBOSE
+
+# Restricciones
+AllowUsers socuser
+DenyUsers root admin
+
+# Cifrado
+Ciphers aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512,hmac-sha2-256
+KexAlgorithms curve25519-sha256,ecdh-sha2-nistp521
+
+# Túneles
+AllowTcpForwarding no
+X11Forwarding no
+AllowAgentForwarding no
+PermitTunnel no
