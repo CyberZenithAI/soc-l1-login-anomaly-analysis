@@ -1,0 +1,47 @@
+# Docker
+docker/volumes/
+*.log
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.env
+
+# Logs
+logs/
+*.log
+!docs/*.log
+
+# Temporal
+temp/
+tmp/
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Credenciales
+secrets/
+*.pem
+*.key
+*.crt
+
+# Backup
+*.bak
+*.backup
+
+# Documentos generados
+*.pdf
+*.docx
+*.xlsx
+
+# Archivos grandes
+*.zip
+*.tar
+*.gz
