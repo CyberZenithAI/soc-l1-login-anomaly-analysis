@@ -1,0 +1,242 @@
+version: '3.8'
+
+services:
+  # ==================== WA ZUH STACK ====================
+  wazuh.manager:
+    image: wazuh/wazuh-manager:4.7.2
+    container_name: wazuh_manager
+    hostname: wazuh.manager
+    restart: always
+    ports:
+      - "1514:1514"           # Agent registration
+      - "1515:1515"           # Agent communication
+      - "1516:1516"           # Agent communication (TCP)
+      - "514:514/udp"         # Syslog
+      - "55000:55000/tcp"     # Agent enrollment
+    environment:
+      - INDEXER_URL=https://wazuh.indexer:9200
+      - INDEXER_USERNAME=admin
+      - INDEXER_PASSWORD=${WAZUH_PASSWORD:-ChangeMe123!}
+      - API_USERNAME=${WAZUH_API_USER:-wazuh}
+      - API_PASSWORD=${WAZUH_API_PASS:-wazuh-api-pass}
+      - CLUSTER_NAME=soc-l1-lab
+    volumes:
+      - wazuh_manager_api:/var/ossec/api/configuration
+      - wazuh_manager_etc:/var/ossec/etc
+      - wazuh_manager_logs:/var/ossec/logs
+      - wazuh_manager_queue:/var/ossec/queue
+      - wazuh_manager_var:/var/ossec/var
+      - ./docker/wazuh-config/ossec.conf:/var/ossec/etc/ossec.conf
+      - ./docker/wazuh-config/local_rules.xml:/var/ossec/etc/rules/local_rules.xml
+      - ./docker/wazuh-config/decoders:/var/ossec/etc/decoders
+      - ./logs/wazuh:/var/ossec/logs/archives
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.10
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:55000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  wazuh.indexer:
+    image: wazuh/wazuh-indexer:4.7.2
+    container_name: wazuh_indexer
+    hostname: wazuh.indexer
+    restart: always
+    ports:
+      - "9200:9200"           # REST API
+      - "9300:9300"           # Cluster communication
+    environment:
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${WAZUH_PASSWORD:-ChangeMe123!}
+      - "discovery.type=single-node"
+    volumes:
+      - wazuh_indexer_data:/var/lib/wazuh-indexer
+      - wazuh_indexer_logs:/var/log/wazuh-indexer
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.11
+    healthcheck:
+      test: ["CMD", "curl", "-f", "-u", "admin:${WAZUH_PASSWORD:-ChangeMe123!}", "https://localhost:9200"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  wazuh.dashboard:
+    image: wazuh/wazuh-dashboard:4.7.2
+    container_name: wazuh_dashboard
+    hostname: wazuh.dashboard
+    restart: always
+    ports:
+      - "443:5601"            # HTTPS Dashboard
+      - "80:5601"             # HTTP Dashboard (optional)
+    environment:
+      - OPENSEARCH_HOSTS=https://wazuh.indexer:9200
+      - OPENSEARCH_USERNAME=admin
+      - OPENSEARCH_PASSWORD=${WAZUH_PASSWORD:-ChangeMe123!}
+      - DASHBOARD_SERVERNAME=localhost
+      - DASHBOARD_PORT=5601
+      - NODE_OPTIONS=--max-old-space-size=512
+    volumes:
+      - wazuh_dashboard_configuration:/usr/share/wazuh-dashboard/data/wazuh/config
+      - wazuh_dashboard_data:/usr/share/wazuh-dashboard/data
+      - ./examples/dashboards/kibana-export.ndjson:/usr/share/wazuh-dashboard/data/import.ndjson
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.12
+    depends_on:
+      wazuh.indexer:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5601"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ==================== SSH SERVER (TARGET) ====================
+  ssh.target:
+    image: alpine:latest
+    container_name: ssh_target
+    hostname: ssh.target.lab
+    restart: unless-stopped
+    ports:
+      - "2222:22"            # SSH exposed on port 2222
+    environment:
+      - SSH_USER=${SSH_USER:-socuser}
+      - SSH_PASSWORD=${SSH_PASSWORD:-S0cP@ssw0rd!}
+      - ROOT_PASSWORD=${ROOT_PASSWORD:-R00tP@ss!}
+    volumes:
+      - ./config/ssh-server/sshd_config:/etc/ssh/sshd_config
+      - ./config/ssh-server/authorized_keys:/home/socuser/.ssh/authorized_keys
+      - ssh_target_logs:/var/log
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.20
+    command: >
+      sh -c '
+      apk add --no-cache openssh openssh-server-pam shadow &&
+      echo "root:$${ROOT_PASSWORD}" | chpasswd &&
+      adduser -D $${SSH_USER} &&
+      echo "$${SSH_USER}:$${SSH_PASSWORD}" | chpasswd &&
+      mkdir -p /home/$${SSH_USER}/.ssh &&
+      chmod 700 /home/$${SSH_USER}/.ssh &&
+      if [ -f /home/$${SSH_USER}/.ssh/authorized_keys ]; then
+        chmod 600 /home/$${SSH_USER}/.ssh/authorized_keys;
+        chown -R $${SSH_USER}:$${SSH_USER} /home/$${SSH_USER}/.ssh;
+      fi &&
+      ssh-keygen -A &&
+      /usr/sbin/sshd -D -e
+      '
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "22"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # ==================== KALI LINUX (ATTACKER SIMULATION) ====================
+  kali.attacker:
+    image: kalilinux/kali-rolling:latest
+    container_name: kali_attacker
+    hostname: kali.attacker.lab
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+    privileged: true
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+      - SYS_ADMIN
+    volumes:
+      - ./scripts/simulation:/root/scripts
+      - ./config/kali-attacker:/root/config
+      - kali_attacker_data:/root/data
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.30
+    command: >
+      bash -c '
+      apt-get update &&
+      apt-get install -y --no-install-recommends 
+        ssh 
+        hydra 
+        nmap 
+        curl 
+        python3 
+        python3-pip 
+        net-tools 
+        iputils-ping 
+        vim &&
+      pip3 install requests &&
+      tail -f /dev/null
+      '
+    depends_on:
+      - ssh.target
+
+  # ==================== LOG COLLECTOR ====================
+  fluentd.collector:
+    image: fluent/fluentd:v1.16-1
+    container_name: fluentd_collector
+    restart: unless-stopped
+    volumes:
+      - ./config/fluentd/fluent.conf:/fluentd/etc/fluent.conf
+      - ./logs/collected:/fluentd/log
+    ports:
+      - "24224:24224"
+      - "24224:24224/udp"
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.40
+
+  # ==================== MONITORING ====================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus_monitor
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.50
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana_dashboard
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-grafana123}
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+    ports:
+      - "3000:3000"
+    networks:
+      soc_lab_network:
+        ipv4_address: 10.10.10.51
+
+networks:
+  soc_lab_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.10.10.0/24
+          gateway: 10.10.10.1
+
+volumes:
+  wazuh_manager_api:
+  wazuh_manager_etc:
+  wazuh_manager_logs:
+  wazuh_manager_queue:
+  wazuh_manager_var:
+  wazuh_indexer_data:
+  wazuh_indexer_logs:
+  wazuh_dashboard_configuration:
+  wazuh_dashboard_data:
+  ssh_target_logs:
+  kali_attacker_data:
+  prometheus_data:
+  grafana_data:
