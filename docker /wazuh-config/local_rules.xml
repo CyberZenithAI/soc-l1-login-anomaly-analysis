@@ -1,0 +1,119 @@
+<!-- SOC L1 Lab - Custom Detection Rules -->
+<group name="soc_l1_detection,">
+
+  <!-- SSH Brute Force Detection -->
+  <rule id="100000" level="5">
+    <if_sid>5710</if_sid>
+    <match>^Failed password for</match>
+    <description>SSH authentication failed - Single attempt</description>
+    <group>authentication_failed,ssh,</group>
+  </rule>
+
+  <rule id="100001" level="10">
+    <if_sid>100000</if_sid>
+    <same_source_ip />
+    <frequency>5</frequency>
+    <timeframe>60</timeframe>
+    <description>Multiple SSH authentication failures from same source IP (Brute Force)</description>
+    <group>authentication_failures,ssh,brute_force,</group>
+  </rule>
+
+  <rule id="100002" level="12">
+    <if_sid>100001</if_sid>
+    <same_source_ip />
+    <frequency>10</frequency>
+    <timeframe>120</timeframe>
+    <description>High volume SSH brute force attack detected</description>
+    <group>authentication_failures,ssh,brute_force,critical,</group>
+  </rule>
+
+  <!-- SSH Successful Login After Failures -->
+  <rule id="100003" level="8">
+    <if_sid>100001</if_sid>
+    <match>^Accepted password for</match>
+    <timeframe>300</timeframe>
+    <description>Successful SSH login after multiple failures (Possible compromise)</description>
+    <group>authentication_success,ssh,compromise,</group>
+  </rule>
+
+  <!-- Port Scanning Detection -->
+  <rule id="100010" level="7">
+    <match>^Connection from</match>
+    <description>New incoming connection detected</description>
+    <group>network,connection,</group>
+  </rule>
+
+  <rule id="100011" level="10">
+    <if_sid>100010</if_sid>
+    <same_source_ip />
+    <frequency>20</frequency>
+    <timeframe>30</timeframe>
+    <description>Multiple connections from same source (Port Scanning)</description>
+    <group>network,port_scan,</group>
+  </rule>
+
+  <!-- Invalid User Attempts -->
+  <rule id="100020" level="6">
+    <match>^Invalid user</match>
+    <description>SSH login attempt with invalid username</description>
+    <group>authentication_failed,ssh,invalid_user,</group>
+  </rule>
+
+  <rule id="100021" level="9">
+    <if_sid>100020</if_sid>
+    <same_source_ip />
+    <frequency>3</frequency>
+    <timeframe>60</timeframe>
+    <description>Multiple invalid user attempts from same source</description>
+    <group>authentication_failed,ssh,invalid_user,brute_force,</group>
+  </rule>
+
+  <!-- Root Login Attempts -->
+  <rule id="100030" level="8">
+    <match>^Failed password for root</match>
+    <description>SSH root login attempt failed</description>
+    <group>authentication_failed,ssh,root,</group>
+  </rule>
+
+  <rule id="100031" level="12">
+    <if_sid>100030</if_sid>
+    <same_source_ip />
+    <frequency>2</frequency>
+    <timeframe>300</timeframe>
+    <description>Multiple root login attempts (High risk)</description>
+    <group>authentication_failed,ssh,root,critical,</group>
+  </rule>
+
+  <!-- SOC L1 Specific Rules -->
+  <rule id="100100" level="3">
+    <match>^Accepted publickey for</match>
+    <description>SSH key-based authentication successful</description>
+    <group>authentication_success,ssh,key_auth,</group>
+  </rule>
+
+  <rule id="100101" level="5">
+    <match>^session opened for user</match>
+    <description>User session started</description>
+    <group>session,start,</group>
+  </rule>
+
+  <rule id="100102" level="5">
+    <match>^session closed for user</match>
+    <description>User session ended</description>
+    <group>session,end,</group>
+  </rule>
+
+  <!-- Docker Container Monitoring -->
+  <rule id="100200" level="5">
+    <match>Container killed</match>
+    <description>Docker container terminated unexpectedly</description>
+    <group>docker,container,security,</group>
+  </rule>
+
+  <rule id="100201" level="7">
+    <match>privileged container started</match>
+    <description>Privileged Docker container launched</description>
+    <group>docker,container,privileged,security,</group>
+  </rule>
+
+</group>
