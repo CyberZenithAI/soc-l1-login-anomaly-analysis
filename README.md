@@ -1,100 +1,155 @@
-# 🔐 SOC L1 – Login Anomaly Analysis (2026)
+# 🔐 SOC L1 – Análisis de Anomalías en Inicios de Sesión (2026)
 
-## 📌 Overview
-Practical **SOC L1 portfolio project** focused on detecting, analyzing, and documenting **suspicious login activity** using **Wazuh SIEM** and real authentication logs within a controlled laboratory environment.
+## 📌 Resumen
+Proyecto práctico de **portafolio SOC L1** enfocado en detectar, analizar y documentar **actividad sospechosa de inicio de sesión** utilizando **Wazuh SIEM** y registros de autenticación reales dentro de un entorno de laboratorio controlado.
 
-This repository is designed for **entry-level SOC / Blue Team roles**, demonstrating hands-on skills rather than theory alone.
-
----
-
-## 🎯 Project Objectives
-- Detect suspicious authentication behavior  
-- Analyze security logs (`auth.log`)  
-- Classify incidents by severity and impact  
-- Apply proper **SOC L1 escalation workflow**  
+Este repositorio está diseñado para **roles SOC/Blue Team de nivel inicial**, demostrando habilidades prácticas en lugar de solo teoría.
 
 ---
 
-## 🧠 Simulated Scenario
-- **SSH brute-force attack**  
-- Multiple failed login attempts  
-- Subsequent successful login  
-- Valid local user account  
-
-This scenario reflects a **common real-world SOC L1 case**.
+## 🎯 Objetivos del Proyecto
+- Detectar comportamientos sospechosos de autenticación  
+- Analizar registros de seguridad (`auth.log`)  
+- Clasificar incidentes por severidad e impacto  
+- Aplicar el **flujo de trabajo de escalamiento SOC L1** adecuado  
 
 ---
 
-## 🛠️ Tools & Technologies
-- **Wazuh SIEM** (Docker deployment)  
+## 🧠 Escenario Simulado
+- **Ataque de fuerza bruta SSH**  
+- Múltiples intentos fallidos de inicio de sesión  
+- Inicio de sesión exitoso posterior  
+- Cuenta de usuario local válida  
+
+Este escenario refleja un **caso común del mundo real en SOC L1**.
+
+---
+
+## 🛠️ Herramientas y Tecnologías
+- **Wazuh SIEM** (implementación en Docker)  
 - Kali Linux  
 - SSH  
-- Hydra *(used strictly in a controlled lab)*  
-- VirusTotal (IP reputation)  
-- AbuseIPDB (threat intelligence)  
-- GitHub (documentation & version control)  
+- Hydra *(usado estrictamente en un laboratorio controlado)*  
+- VirusTotal (reputación de IP)  
+- AbuseIPDB (inteligencia de amenazas)  
+- GitHub (documentación y control de versiones)  
 
 ---
 
-## 🧩 Lab Architecture
-| Role | System |
+## 🧩 Arquitectura del Laboratorio
+| Rol | Sistema |
 |---|---|
-| SOC Analyst | Kali Linux |
-| Endpoint | Kali Linux (SSH service) |
+| Analista SOC | Kali Linux |
+| Endpoint | Kali Linux (servicio SSH) |
 | SIEM | Wazuh (Docker) |
 
 ---
 
-## 🔍 SOC L1 Analysis Workflow
-1. Alert review in Wazuh Dashboard  
-2. Authentication log analysis (`auth.log`)  
-3. Source IP and behavior validation  
-4. Event correlation  
-5. Incident classification  
-6. Escalation to SOC L2 with evidence  
+## 🔍 Flujo de Trabajo de Análisis SOC L1
+1. Revisión de alertas en el Panel de Wazuh  
+2. Análisis de registros de autenticación (`auth.log`)  
+3. Validación de IP de origen y comportamiento  
+4. Correlación de eventos  
+5. Clasificación de incidentes  
+6. Escalamiento a SOC L2 con evidencia  
 
 ---
 
-## 📊 Incident Classification
-- **Type:** SSH Brute Force  
-- **Severity:** Medium / High  
-- **Impact:** Potential credential compromise  
-- **Recommended Action:** Escalation and mitigation  
+## 📊 Clasificación del Incidente
+- **Tipo:** Fuerza Bruta SSH  
+- **Severidad:** Media / Alta  
+- **Impacto:** Potencial compromiso de credenciales  
+- **Acción Recomendada:** Escalamiento y mitigación  
 
 ---
 
-## 📂 Repository Structure
-
+## 📂 Estructura del Repositorio
+```
 soc-l1-login-anomaly-analysis/
-├── analysis/
-│   └── login_case_analysis.md
-├── detections/
-│   └── wazuh_bruteforce_rule.xml
-├── logs/
-│   └── sample_auth.log
-├── escalation/
-│   └── soc_l1_escalation.md
-└── screenshots/
+├── 📂 docker/
+│   ├── docker-compose.yml          # Orquestación principal
+│   ├── Dockerfile                  # Imagen personalizada
+│   └── wazuh-config/
+│       ├── ossec.conf             # Configuración principal Wazuh
+│       ├── local_rules.xml        # Reglas personalizadas
+│       └── decoders/
+│           └── custom_decoders.xml
+├── 📂 scripts/
+│   ├── setup/
+│   │   ├── install-dependencies.sh
+│   │   ├── setup-lab.sh
+│   │   └── health-check.sh
+│   ├── simulation/
+│   │   ├── ssh-brute-force.sh
+│   │   ├── port-scan-sim.sh
+│   │   └── generate-auth-logs.py
+│   ├── threat-intelligence/
+│   │   ├── virustotal-api.py
+│   │   ├── abuseipdb-api.py
+│   │   └── threat-intel-enricher.sh
+│   └── soc-workflow/
+│       ├── incident-classifier.py
+│       ├── alert-triage.sh
+│       └── escalation-workflow.md
+├── 📂 config/
+│   ├── ssh-server/
+│   │   ├── sshd_config
+│   │   └── authorized_keys
+│   ├── kali-attacker/
+│   │   └── attack-scripts/
+│   └── firewall/
+│       └── iptables-rules.sh
+├── 📂 docs/
+│   ├── SOC-WORKFLOW.md
+│   ├── INCIDENT-RESPONSE-GUIDE.md
+│   ├── API-INTEGRATION.md
+│   └── ETHICAL-GUIDELINES.md
+├── 📂 examples/
+│   ├── alerts/
+│   │   ├── ssh-brute-force-alert.json
+│   │   └── port-scan-alert.json
+│   ├── dashboards/
+│   │   └── kibana-export.ndjson
+│   ├── reports/
+│   │   ├── incident-report-template.md
+│   │   └── soc-daily-report.md
+│   └── logs/
+│       └── sample-auth.log
+├── 📂 tests/
+│   ├── test-detection-rules.sh
+│   └── test-api-integration.py
+├── 📂 monitoring/
+│   ├── prometheus/
+│   │   └── prometheus.yml
+│   └── grafana/
+│       └── dashboards/
+├── .env.example
+├── .gitignore
+├── LICENSE
+├── README.md
+├── CHANGELOG.md
+└── CONTRIBUTING.md
+```
 
 ---
 
-## 🧠 Skills Demonstrated
-✔ SOC L1 operational mindset  
-✔ Log analysis and alert triage  
-✔ Proper SIEM usage  
-✔ Incident classification and escalation  
-✔ Clear and professional documentation  
+## 🧠 Habilidades Demostradas
+✔ Mentalidad operativa SOC L1  
+✔ Análisis de registros y triaje de alertas  
+✔ Uso adecuado de SIEM  
+✔ Clasificación de incidentes y escalamiento  
+✔ Documentación clara y profesional  
 
 ---
 
-## 🚀 Target Roles
-**SOC L1 Analyst | Blue Team Junior | Junior Cybersecurity Analyst**
+## 🚀 Roles Objetivo
+**Analista SOC L1 | Blue Team Junior | Analista Junior de Ciberseguridad**
 
 ---
 
-## ⚠️ Ethical Notice
-All activities were conducted in a **self-owned, isolated lab environment** for **educational and professional purposes only**.
+## ⚠️ Aviso Ético
+Todas las actividades se realizaron en un **entorno de laboratorio aislado y de propiedad propia** con **fines educativos y profesionales únicamente**.
 
 ---
 
-📌 *This project was developed as part of my preparation to work in a real Security Operations Center (SOC) in 2026.*
+📌 *Este proyecto fue desarrollado como parte de mi preparación para trabajar en un Centro de Operaciones de Seguridad (SOC) real en 2026.*
